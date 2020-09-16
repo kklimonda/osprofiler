@@ -100,6 +100,38 @@ Examples of possible values:
 * ``jaeger://127.0.0.1:6831`` - use jaeger tracing as driver for sending spans.
 """)
 
+_es_indices_prefix = cfg.StrOpt(
+    "es_indices_prefix",
+    default="",
+    help="""
+Common prefix for all indices created in elasticsearch.
+"""
+)
+
+_es_insecure = cfg.BoolOpt(
+    "es_insecure",
+    default=False,
+    help="""
+Whether to verify certificate when connecting to the cluster.
+"""
+)
+
+_es_username = cfg.StrOpt(
+    "es_username",
+    default="",
+    help="""
+User used when connecting to the cluster.
+"""
+)
+
+_es_password = cfg.StrOpt(
+    "es_password",
+    default="",
+    help="""
+Password used when connecting to the cluster.
+"""
+)
+
 _es_doc_type_opt = cfg.StrOpt(
     "es_doc_type",
     default="notification",
@@ -160,6 +192,10 @@ _PROFILER_OPTS = [
     _trace_sqlalchemy_opt,
     _hmac_keys_opt,
     _connection_string_opt,
+    _es_indices_prefix,
+    _es_insecure,
+    _es_username,
+    _es_password,
     _es_doc_type_opt,
     _es_scroll_time_opt,
     _es_scroll_size_opt,

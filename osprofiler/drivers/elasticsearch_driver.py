@@ -33,7 +33,9 @@ class ElasticsearchDriver(base.Driver):
                                                   conf=conf,
                                                   **kwargs)
         try:
+            import ssl
             from elasticsearch import Elasticsearch
+            from elasticsearch.connection import create_ssl_context
         except ImportError:
             raise exc.CommandError(
                 "To use OSProfiler with ElasticSearch driver, "
@@ -43,9 +45,23 @@ class ElasticsearchDriver(base.Driver):
         client_url = parser.urlunparse(parser.urlparse(self.connection_str)
                                        ._replace(scheme="http"))
         self.conf = conf
-        self.client = Elasticsearch(client_url)
-        self.index_name = index_name
-        self.index_name_error = "osprofiler-notifications-error"
+
+        ssl_context = create_ssl_context()
+
+        if self.conf.profiler.es_insecure:
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+
+        username, password = cfg.profiler.es_username, cfg.profiler.es_password
+        if username and password:
+            self.client = Elasticsearch(client_url, ssl_context=ssl_context, http_auth=(username, password))
+        else:
+            self.client = Elasticsearch(client_url, ssl_context=ssl_context)
+        self.client = Elasticsearch(client_url, ssl_context=ssl_context)
+
+        index_prefix = cfg.profiler.es_indices_prefix
+        self.index_name = index_prefix + index_name
+        self.index_name_error = index_prefix + index_name + "-error"
 
     @classmethod
     def get_name(cls):
